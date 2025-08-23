@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { data } from './data'
 import { ref, onMounted, useTemplateRef, reactive, watch } from 'vue'
 const currentSong = ref('')
 const currentSongIndex = ref<number>(0)
@@ -27,9 +28,11 @@ interface Data {
 // 获取歌曲数据
 const resize = async () => {
     try {
-        const data1 = await fetch('../public/data.json')
-        const data = await data1.json()
+        // const data1 = await fetch('/src/assets/data.json')
+        // const data = await data1.json()
         audioList.value = data
+        console.log(data);
+        
 
     } catch (error) {
         console.log(error);
