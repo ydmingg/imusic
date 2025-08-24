@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { data } from './data'
-import { ref, onMounted, useTemplateRef, reactive, watch } from 'vue'
+// import { data } from './data'
+import PlayControl from './components/PlayControl.vue'
+import AudioMenus from './components/AudioMenus.vue'
+import { ref, onMounted, useTemplateRef, reactive } from 'vue'
 const currentSong = ref('')
 const currentSongIndex = ref<number>(0)
 const isPlay = ref<Boolean>(false)
 const audioTag = useTemplateRef<HTMLAudioElement>('audio')
-const audioList = ref<Data[]>([])
+const audioList = ref<any[]>([])
 const loading = ref<Boolean>(true)
 const progressTime = reactive<{
     currentTime: number,
@@ -18,7 +20,7 @@ const progressTime = reactive<{
 })
 
 interface Data {
-    id: number,
+    id: number ,
     artist: string,
     cover: string,
     title: string,
@@ -28,11 +30,16 @@ interface Data {
 // 获取歌曲数据
 const resize = async () => {
     try {
-        // const data1 = await fetch('/src/assets/data.json')
-        // const data = await data1.json()
-        audioList.value = data
-        console.log(data);
+        const urlldata = `method=baidu.ting.diy.gedanInfo&platform=darwin&version=11.2.1&listid=309539&from=qianqianmini`
+        const urll = `/baiduapi/v1/restserver/ting?${urlldata}`
         
+        const data1 = await fetch(urll)
+        const data2 = await data1.json()
+        // audioList.value = data
+        console.log(data2);
+        audioList.value = data2.playlist.tracks
+        // 获取歌曲文件
+
 
     } catch (error) {
         console.log(error);
@@ -41,10 +48,22 @@ const resize = async () => {
     }
 }
 
+async function funson(id: number) { 
+    
+    const sonUrl = `/weapi/weapi/search/get`
+    const sonD = await fetch(sonUrl)
+    // const sonData = await sonD.json()
+    console.log(sonD);
+    
+    
+}
+
 // 初始化加载
 onMounted(async () => {
     await resize()
-    currentSong.value = audioList.value[currentSongIndex.value].url
+    // 初始化第一首歌曲
+    // await funson(audioList.value[0].id)
+    // currentSong.value = audioList.value[currentSongIndex.value].url
 })
 
 // 播放
@@ -54,6 +73,7 @@ const play = () => {
         isPlay.value = true
     }
 }
+
 // 暂停
 const stop = () => {
     if (audioTag.value) {
@@ -64,7 +84,7 @@ const stop = () => {
 
 // 播放 & 暂停
 const handlePlay = () => {
-   if (!isPlay.value) {
+    if (!isPlay.value) {
         play()
     } else {
         stop()
@@ -100,7 +120,7 @@ function onLoadedMetadata() {
 const onTimeUpdate = () => {
     if (audioTag.value) {
         progressTime.currentTime = audioTag.value.currentTime
-        progressTime.progress = (audioTag.value.currentTime / progressTime.duration) * 100 || 0; 
+        progressTime.progress = (audioTag.value.currentTime / progressTime.duration) * 100 || 0;
     }
 }
 // 拖动进度条
@@ -123,31 +143,15 @@ const onSeek = (e: Event) => {
             @loadedmetadata="onLoadedMetadata" 
             @timeupdate="onTimeUpdate">
         </audio>
-        <div class="audio-box-list">
-            <div v-if="loading">loading...</div>
-            <div v-else v-for="(item, index) in audioList" :key="item.id">
-                <img :src="item.cover" />
-                <p :class="{ select: index === currentSongIndex }">{{ item.title }}</p>
-                <text>{{ item.artist }}</text>
-            </div>
-        </div>
-        <div class="audio-box-progress">
-            <input
-                type="range"
-                min="0"
-                max="100"
-                step="0.1"
-                :value="progressTime.progress"
-                @input="onSeek"
-            />
-            <text>{{ Math.floor(progressTime.currentTime) }} / {{ Math.floor(progressTime.duration) }} 秒</text>
-        </div>
-        <div class="audio-box-button">
-            <button @click="handleTopSong">上一曲</button>
-            <button @click="handlePlay">{{ isPlay ? '暂停' : '播放' }}</button>
-            <button @click="handleNextSong">下一曲</button>
-            
-        </div>
+        <AudioMenus :loading="loading" :audioList="audioList" :currentSongIndex="currentSongIndex" />
+        <PlayControl 
+            :progressTime="progressTime" 
+            :isPlay="isPlay" 
+            @handlePlay="handlePlay" 
+            @handleTopSong="handleTopSong" 
+            @handleNextSong="handleNextSong"
+            @onSeek="onSeek"
+        />
     </div>
 </template>
 
@@ -160,50 +164,5 @@ const onSeek = (e: Event) => {
     margin: 0 auto;
 }
 
-.audio-box-list {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 20px;
 
-    >* {
-        flex: 1;
-
-        p {
-            font-size: 16px;
-            font-weight: bolder;
-
-            &.select {
-                color: #0075ff;
-            }
-        }
-
-        text {
-            font-size: 13px;
-            color: #888;
-        }
-    }
-}
-
-.audio-box-progress{
-    display: flex;
-    input{
-        flex:1;
-        margin-right: 20px;
-    }
-    text{
-        display: flex;
-        width: 100px;
-        color: #888;
-    }
-}
-
-.audio-box-button {
-    display: flex;
-    justify-content: center;
-
-    button {
-        margin: 20px 4px;
-    }
-}
 </style>
