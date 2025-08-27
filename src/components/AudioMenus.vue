@@ -9,9 +9,9 @@ const id = Math.random()
     <div class="audio-box-list">
             <div v-if="loading">loading...</div>
             <div v-else v-for="(item, index) in audioList" :key="id">
-                <img :src="item.al.picUrl" width="40" height="40" />
-                <p :class="{ select: index === currentSongIndex }">{{ item.al.name }}</p>
-                <text>{{ item.al.id }}</text>
+                <img :src="item.picurl" width="40" height="40" />
+                <p :class="{ select: index === currentSongIndex }">{{ item.name }}</p>
+                <text>{{ item.artistsname }}</text>
             </div>
         </div>
 </template>

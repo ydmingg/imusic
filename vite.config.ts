@@ -17,21 +17,16 @@ export default defineConfig({
     },
     server: {
         proxy: {
-            '/api': {
-                target: 'http://music.163.com',
+            '/openapi': {
+                target: 'http://openapi.music.163.com/',
                 changeOrigin: true,
                 rewrite: (path) => path.replace(/^\/api/, ''),
             },
-            '/weapi': {
-                target: 'http://music.163.com',
+            '/api': {
+                target: 'https://api.uomg.com/',
                 changeOrigin: true,
-                rewrite: (path) => path.replace(/^\/weapi/, ''),
+                rewrite: (path) => path.replace(/^\/api/, ''),
             },
-            '/baiduapi': {
-                target: 'http://musicapi.taihe.com',
-                changeOrigin: true,
-                rewrite: (path) => path.replace(/^\/baiduapi/, '')
-            }
         }
     }
 })
