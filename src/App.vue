@@ -1,7 +1,8 @@
 <script setup lang="ts">
-// import { data } from './data'
-import PlayControl from './components/PlayControl.vue'
+import Header from './components/header/Header.vue'
+import PlayControl from './components/footer/PlayControl.vue'
 import AudioMenus from './components/AudioMenus.vue'
+import Content from './components/Content/Comtent.vue'
 import { ref, onMounted, useTemplateRef, computed, reactive, watch, watchEffect } from 'vue'
 const currentSong = ref('')
 const currentSongIndex = ref<number>(0)
@@ -9,7 +10,7 @@ const isPlay = ref(false)
 const audioTag = useTemplateRef<HTMLAudioElement>('audio')
 const audioList = ref()
 const loading = ref(true)
-const sortType = ref('飙升榜'); 
+const sortType = ref('飙升榜');
 const autoSong = ref(0)
 const isLoadingSong = ref(false)
 
@@ -43,9 +44,9 @@ const resize = async () => {
         if (result?.data?.url) {
             audioList.value = [result.data]
             currentSong.value = result.data.url
-        } else { 
+        } else {
             console.log("当前歌曲不存在！！！！！！");
-            
+
             return await resize()
         }
 
@@ -58,8 +59,8 @@ const resize = async () => {
     }
 }
 
-watch(autoSong, async () => { 
-    if (autoSong.value>=100) { 
+watch(autoSong, async () => {
+    if (autoSong.value >= 100) {
         console.log("自动切歌！");
         await resize();
         play();
@@ -67,33 +68,33 @@ watch(autoSong, async () => {
 })
 
 // 初始化加载
-onMounted(async () => { 
+onMounted(async () => {
     await resize()
 
-    
+
     console.log("初始化");
-    
+
 })
 
 
 let lastClick = 0;
-function throttle(fn:Function, delay=1000) { 
-    return (...args:any[]) => { 
+function throttle(fn: Function, delay = 1000) {
+    return (...args: any[]) => {
         const now = Date.now();
-        if (now - lastClick > delay) { 
+        if (now - lastClick > delay) {
             lastClick = now
             fn(...args)
         }
-    }   
+    }
 }
 // 播放
 const play = () => {
     if (audioTag.value) {
         audioTag.value.play()
         isPlay.value = true
-        
+
     }
-    
+
 }
 
 // 暂停
@@ -166,34 +167,56 @@ const onSeek = (e: Event) => {
 </script>
 
 <template>
-    <div class="audio-box">
-        <audio 
-            :src="currentSong" 
-            ref="audio" 
-            @loadedmetadata="onLoadedMetadata" 
-            @timeupdate="onTimeUpdate"
-            @ended="handleNextSong" >
-        </audio>
-        <AudioMenus :loading="loading" :audioList="audioList" :currentSongIndex="currentSongIndex" />
+    <n-layout position="absolute">
+        <Header />
+        <Content>
+            <n-flex style="margin-top: 47px;">
+                <n-layout>
+                    <!-- 信息 -->
+                </n-layout>
+                <n-layout >
+                    <div class="audio-box">
+                        <audio 
+                            :src="currentSong" 
+                            ref="audio" 
+                            @loadedmetadata="onLoadedMetadata" 
+                            @timeupdate="onTimeUpdate"
+                            @ended="handleNextSong" >
+                        </audio>
+                        <AudioMenus :loading="loading" :audioList="audioList" :currentSongIndex="currentSongIndex" />
+                        
+                    </div>
+                </n-layout>
+            </n-flex>
+        </Content>
         <PlayControl 
             :progressTime="progressTime" 
             :isPlay="isPlay" 
+            :loading="loading" 
+            :audioList="audioList"
             @handlePlay="handlePlay" 
             @handleTopSong="handleTopSong" 
             @handleNextSong="handleTopSong"
             @onSeek="onSeek"
         />
-    </div>
+    </n-layout>
 </template>
 
 <style scoped>
-.audio-box {
+/* .audio-box {
     display: flex;
     flex-direction: column;
     justify-content: center;
     width: auto;
     margin: 0 auto;
-}
+} */
 
+/* .n-layout-sider {
+  background: rgba(128, 128, 128, 0.3);
+} */
 
+/* .n-layout-content {
+  background: rgba(128, 128, 128, 0.4);
+} */
 </style>
+
