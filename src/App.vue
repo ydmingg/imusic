@@ -63,14 +63,14 @@ const onSeek = (e: Event) => {
 };
 
 // 检测当前是否在播放，如果当前没有播放，则自动播放下一首
-const isAudioURL = () => { 
-    if (!isPlay.value && progressTime.value.duration === 0) { 
+const isAudioURL = () => {
+    if (!isPlay.value && progressTime.value.duration === 0) {
         nextSong(audioTag.value, sortType.value)
     }
 };
 
 // 播放/暂停、上一首、下一首
-const onTogglePlay = () => { 
+const onTogglePlay = () => {
     isAudioURL();
     // 切换歌曲
     togglePlay(audioTag.value)
@@ -79,7 +79,7 @@ const onPrevSong = () => {
     isAudioURL();
     prevSong(audioTag.value, sortType.value);
 }
-const onNextSong = () => { 
+const onNextSong = () => {
     nextSong(audioTag.value, sortType.value);
 }
 
@@ -87,28 +87,14 @@ const onNextSong = () => {
 
 <template>
     <n-layout position="absolute">
+        <audio 
+            :src="currentSong" 
+            ref="audio" 
+            @loadedmetadata="onTimeUpdate" 
+            @timeupdate="onTimeUpdate"
+        ></audio>
         <Header />
-        <Content>
-            <n-flex style="margin-top: 47px;">
-                <n-layout>
-                    <!-- 信息 -->
-                </n-layout>
-                <n-layout >
-                    <div class="audio-box">
-                        <audio 
-                            :src="currentSong" 
-                            ref="audio" 
-                            @loadedmetadata="onTimeUpdate" 
-                            @timeupdate="onTimeUpdate"
-                             >
-                             <!-- @ended="nextSong" @loadedmetadata="onLoadedMetadata"  -->
-                        </audio>
-                        <AudioMenus :loading="loading" :audioList="audioList" :currentSongIndex="currentSongIndex" />
-                        
-                    </div>
-                </n-layout>
-            </n-flex>
-        </Content>
+        <Content :loading="loading" :audioList="audioList" :currentSongIndex="currentSongIndex" />
         <PlayControl 
             :progressTime="progressTime" 
             :isPlay="isPlay" 

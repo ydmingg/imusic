@@ -22,9 +22,13 @@ declare module 'vue' {
     NLayout: typeof import('naive-ui')['NLayout']
     NLayoutFooter: typeof import('naive-ui')['NLayoutFooter']
     NLayoutHeader: typeof import('naive-ui')['NLayoutHeader']
+    NList: typeof import('naive-ui')['NList']
+    NListItem: typeof import('naive-ui')['NListItem']
     NProgress: typeof import('naive-ui')['NProgress']
     NSpace: typeof import('naive-ui')['NSpace']
     NSpan: typeof import('naive-ui')['NSpan']
+    NTag: typeof import('naive-ui')['NTag']
+    NThing: typeof import('naive-ui')['NThing']
     PlayControl: typeof import('./src/components/footer/PlayControl.vue')['default']
   }
 }
