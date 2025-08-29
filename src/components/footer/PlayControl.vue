@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { 
+import {
     PlayCircleOutline as PlayCircleIcon,
     PauseCircleOutline as PauseCircleIcon,
     PlaySkipBackSharp as PlaySharpIcon,
@@ -9,20 +9,10 @@ import {
 
 defineProps(["progressTime", "isPlay", "loading", "audioList"]);
 const emit = defineEmits(["onSeek", "handlePlay", "handleTopSong", "handleNextSong"]);
-const onSeek = (e: Event) => {
-    emit("onSeek", e);
-}
-const handlePlay = (e: Event) => {
-    emit("handlePlay", e);
-}
-const handleTopSong = (e: Event) => {
-    emit("handleTopSong", e);
-}
-const handleNextSong = (e: Event) => {
-    emit("handleNextSong", e);
-}
-
-
+// const onSeek = (e: Event) => emit("onSeek")
+const handlePlay = () => emit("handlePlay")
+const handleTopSong = () => emit("handleTopSong")
+const handleNextSong = () => emit("handleNextSong")
 
 </script>
 
