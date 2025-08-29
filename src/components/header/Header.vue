@@ -51,7 +51,7 @@ const handleGithub = () => {
     <n-layout-header bordered>
         <n-flex style="height: 100%;" align="center">
             <n-flex style="flex:1">
-                <n-image width="32" height="32" :src="getImageUrl('naivelogo-BdDVTUmz.svg')"/>
+                <n-image width="32" height="32" :src="getImageUrl('naivelogo-BdDVTUmz.svg')" preview-disabled/>
                 <span class="font-16">IMusic</span>
             </n-flex>
             <n-flex justify="center"></n-flex>
