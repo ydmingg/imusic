@@ -6,6 +6,7 @@ import {
     PlaySkipForward as PlayForwardIcon,
     VolumeMediumOutline as VolumeMediumIcon,
 } from '@vicons/ionicons5'
+import Progress from '../progress/Progress.vue'
 
 defineProps(["progressTime", "isPlay", "loading", "audioList"]);
 const emit = defineEmits(["onSeek", "handlePlay", "handleTopSong", "handleNextSong"]);
@@ -13,6 +14,11 @@ const emit = defineEmits(["onSeek", "handlePlay", "handleTopSong", "handleNextSo
 const handlePlay = () => emit("handlePlay")
 const handleTopSong = () => emit("handleTopSong")
 const handleNextSong = () => emit("handleNextSong")
+
+// 声音控制器
+const handleVolumeChange = (e: Event) => {
+    console.log(e);
+}
 
 </script>
 
@@ -33,12 +39,7 @@ const handleNextSong = () => emit("handleNextSong")
                         <n-flex v-else align="center"><n-ellipsis style="max-width: 100px">{{ audioList[0].name }}</n-ellipsis> - <n-ellipsis style="max-width: 100px; color:#999">{{ audioList[0].artistsname }}</n-ellipsis></n-flex>
                         <text>{{ Math.floor(progressTime.currentTime) }} / {{ Math.floor(progressTime.duration) }} 秒</text>
                     </n-flex>
-                    <n-progress
-                        type="line"
-                        :percentage="progressTime.progress"
-                        :show-indicator="false"
-                        :color="{ stops: ['#E3F2FD', '#18a058'] }"
-                    />
+                    <Progress :percentage="progressTime.progress" :height="8" />
                     <!-- <input
                         type="range"
                         min="0"
@@ -65,15 +66,7 @@ const handleNextSong = () => emit("handleNextSong")
             <n-flex justify="end" style="flex:1" >
                 <n-flex size="small" align="center">
                     <n-icon size="20"><VolumeMediumIcon/></n-icon>
-                    <n-progress
-                        type="line"
-                        status="error"
-                        :percentage="10"
-                        :height="3"
-                        :show-indicator="false"
-                        :color="{ stops: ['#E3F2FD', '#18a058'] }"
-                        style="width: 86px;"
-                    />
+                    <Progress :percentage="30" :height="3" style="width: 86px;"/>
                 </n-flex>
 
             </n-flex>

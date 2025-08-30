@@ -10,6 +10,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     AudioMenus: typeof import('./src/components/AudioMenus.vue')['default']
     Comtent: typeof import('./src/components/Content/Comtent.vue')['default']
+    Default: typeof import('./src/components/progress/default.vue')['default']
     Header: typeof import('./src/components/header/Header.vue')['default']
     NButton: typeof import('naive-ui')['NButton']
     NEllipsis: typeof import('naive-ui')['NEllipsis']
@@ -27,8 +28,12 @@ declare module 'vue' {
     NProgress: typeof import('naive-ui')['NProgress']
     NSpace: typeof import('naive-ui')['NSpace']
     NSpan: typeof import('naive-ui')['NSpan']
+    NTabPane: typeof import('naive-ui')['NTabPane']
+    NTabs: typeof import('naive-ui')['NTabs']
     NTag: typeof import('naive-ui')['NTag']
     NThing: typeof import('naive-ui')['NThing']
     PlayControl: typeof import('./src/components/footer/PlayControl.vue')['default']
+    Progress: typeof import('./src/components/progress/Progress.vue')['default']
+    Volume: typeof import('./src/components/footer/Volume.vue')['default']
   }
 }
