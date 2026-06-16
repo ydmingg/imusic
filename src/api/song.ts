@@ -85,7 +85,8 @@ export const fetchSongs = async (sortType: string, limit = 20): Promise<SongData
         const songs = (result.results ?? [])
             .map(normalizeTrack)
             .filter((song): song is SongData => Boolean(song));
-
+        // console.log(songs);
+        
         return songs.length > 0 ? songs : FALLBACK_SONGS;
     } catch (error) {
         console.error('获取歌曲清单失败，使用备用歌曲：', error);
