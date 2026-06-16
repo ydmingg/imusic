@@ -1,16 +1,15 @@
 <script setup lang="ts">
 import Header from './components/header/Header.vue';
 import PlayControl from './components/footer/PlayControl.vue';
-import AudioMenus from './components/AudioMenus.vue';
 import Content from './components/Content/Comtent.vue';
-import { ref, onMounted, useTemplateRef, watch } from 'vue';
+import { onMounted, ref, useTemplateRef } from 'vue';
 import { usePlayer } from './utils/player';
-import { fetchSong } from './api/song';
+import { fetchSongs } from './api/song';
 
 const audioTag = useTemplateRef<HTMLAudioElement>('audio');
-const sortType = ref('飙升榜');
+const sortType = ref('热歌榜');
 const loading = ref(true);
-const autoSong = ref(0);
+const errorMessage = ref('');
 
 const {
     currentSong,
@@ -23,106 +22,88 @@ const {
     nextSong,
     updateProgress,
     seek,
+    setPlaylist,
+    playSongAt,
 } = usePlayer();
 
+const loadPlaylist = async (type = sortType.value) => {
+    loading.value = true;
+    errorMessage.value = '';
+    sortType.value = type;
 
-// 初始化加载
-onMounted(async () => {
-    const song = await fetchSong(sortType.value);
-    if (song) {
-        currentSong.value = song.url;
-        audioList.value = [song];
+    try {
+        const songs = await fetchSongs(type);
+        setPlaylist(songs, 0);
+    } catch (error) {
+        errorMessage.value = '歌曲清单加载失败，请稍后重试。';
+        console.error(error);
+    } finally {
         loading.value = false;
     }
+};
+
+onMounted(() => {
+    void loadPlaylist();
 });
 
-watch(autoSong, async () => {
-    if (autoSong.value >= 100) {
-        console.log("自动切歌！");
-        const song = await fetchSong(sortType.value);
-        if (song) {
-            currentSong.value = song.url;
-            audioList.value = [song];
-            if (audioTag.value) {
-                audioTag.value.play();
-            }
-        }
-    }
-});
-
-// 播放时更新进度
 const onTimeUpdate = () => {
     updateProgress(audioTag.value);
-    autoSong.value = progressTime.value.progress;
 };
 
-// 拖动进度条
-const onSeek = (e: Event) => {
-    const val = (e.target as HTMLInputElement).value;
-    seek(audioTag.value, Number(val));
+const onSeek = (progress: number) => {
+    seek(audioTag.value, progress);
 };
 
-// 检测当前是否在播放，如果当前没有播放，则自动播放下一首
-const isAudioURL = () => {
-    if (!isPlay.value && progressTime.value.duration === 0) {
-        nextSong(audioTag.value, sortType.value)
-    }
-};
-
-// 播放/暂停、上一首、下一首
 const onTogglePlay = () => {
-    isAudioURL();
-    // 切换歌曲
-    togglePlay(audioTag.value)
+    togglePlay(audioTag.value);
 };
-const onPrevSong = () => {
-    isAudioURL();
-    prevSong(audioTag.value, sortType.value);
-}
-const onNextSong = () => {
-    nextSong(audioTag.value, sortType.value);
-}
 
+const onPrevSong = () => {
+    void prevSong(audioTag.value);
+};
+
+const onNextSong = () => {
+    void nextSong(audioTag.value);
+};
+
+const onPlaylistChange = (type: string) => {
+    void loadPlaylist(type);
+};
+
+const onSongSelect = (index: number) => {
+    void playSongAt(audioTag.value, index, true);
+};
 </script>
 
 <template>
     <n-layout position="absolute">
-        <audio 
-            :src="currentSong" 
-            ref="audio" 
-            @loadedmetadata="onTimeUpdate" 
+        <audio
+            :src="currentSong"
+            ref="audio"
+            @loadedmetadata="onTimeUpdate"
             @timeupdate="onTimeUpdate"
+            @ended="onNextSong"
         ></audio>
         <Header />
-        <Content :loading="loading" :audioList="audioList" :currentSongIndex="currentSongIndex" />
-        <PlayControl 
-            :progressTime="progressTime" 
-            :isPlay="isPlay" 
-            :loading="loading" 
+        <Content
+            :loading="loading"
             :audioList="audioList"
-            @handlePlay="onTogglePlay" 
-            @handleTopSong="onPrevSong" 
+            :currentSongIndex="currentSongIndex"
+            :activePlaylist="sortType"
+            :errorMessage="errorMessage"
+            @changePlaylist="onPlaylistChange"
+            @selectSong="onSongSelect"
+        />
+        <PlayControl
+            :progressTime="progressTime"
+            :isPlay="isPlay"
+            :loading="loading"
+            :audioList="audioList"
+            :currentSongIndex="currentSongIndex"
+            @handlePlay="onTogglePlay"
+            @handleTopSong="onPrevSong"
             @handleNextSong="onNextSong"
             @onSeek="onSeek"
         />
     </n-layout>
 </template>
-
-<style scoped>
-/* .audio-box {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    width: auto;
-    margin: 0 auto;
-} */
-
-/* .n-layout-sider {
-  background: rgba(128, 128, 128, 0.3);
-} */
-
-/* .n-layout-content {
-  background: rgba(128, 128, 128, 0.4);
-} */
-</style>
-

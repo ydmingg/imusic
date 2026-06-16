@@ -8,17 +8,12 @@ import {
 } from '@vicons/ionicons5'
 import Progress from '../progress/Progress.vue'
 
-defineProps(["progressTime", "isPlay", "loading", "audioList"]);
+defineProps(["progressTime", "isPlay", "loading", "audioList", "currentSongIndex"]);
 const emit = defineEmits(["onSeek", "handlePlay", "handleTopSong", "handleNextSong"]);
-// const onSeek = (e: Event) => emit("onSeek")
+const onSeek = (value: number) => emit("onSeek", value)
 const handlePlay = () => emit("handlePlay")
 const handleTopSong = () => emit("handleTopSong")
 const handleNextSong = () => emit("handleNextSong")
-
-// 声音控制器
-const handleVolumeChange = (e: Event) => {
-    console.log(e);
-}
 
 </script>
 
@@ -32,22 +27,21 @@ const handleVolumeChange = (e: Event) => {
                     src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
                     preview-disabled
                 />  
-                <n-image width="80" v-else :src="audioList[0].picurl" preview-disabled/>    
+                <n-image width="80" v-else-if="audioList[currentSongIndex]" :src="audioList[currentSongIndex].picurl" preview-disabled/>    
                 <n-flex style="flex:1">
                     <n-flex style="flex:1" justify="space-between">
                         <div v-if="loading" class="">'loading...'</div>
-                        <n-flex v-else align="center"><n-ellipsis style="max-width: 100px">{{ audioList[0].name }}</n-ellipsis> - <n-ellipsis style="max-width: 100px; color:#999">{{ audioList[0].artistsname }}</n-ellipsis></n-flex>
+                        <n-flex v-else-if="audioList[currentSongIndex]" align="center"><n-ellipsis style="max-width: 140px">{{ audioList[currentSongIndex].name }}</n-ellipsis> - <n-ellipsis style="max-width: 120px; color:#999">{{ audioList[currentSongIndex].artistsname }}</n-ellipsis></n-flex>
                         <text>{{ Math.floor(progressTime.currentTime) }} / {{ Math.floor(progressTime.duration) }} 秒</text>
                     </n-flex>
-                    <Progress :percentage="progressTime.progress" :height="8" />
-                    <!-- <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        step="0.1"
+                    <n-slider
                         :value="progressTime.progress"
-                        @input="onSeek"
-                    /> -->
+                        :min="0"
+                        :max="100"
+                        :step="0.1"
+                        :tooltip="false"
+                        @update:value="onSeek"
+                    />
                 </n-flex>
                 
             </n-flex>

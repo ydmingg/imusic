@@ -1,5 +1,5 @@
-import { ref } from 'vue';
-import { fetchSong } from '../api/song';
+import { nextTick, ref } from 'vue';
+import type { SongData } from '../api/song';
 
 interface ProgressTime {
     currentTime: number;
@@ -11,113 +11,99 @@ export const usePlayer = () => {
     const currentSong = ref('');
     const currentSongIndex = ref(0);
     const isPlay = ref(false);
-    const audioList = ref<Array<{ url: string }>>([]);
+    const audioList = ref<SongData[]>([]);
     const progressTime = ref<ProgressTime>({
         currentTime: 0,
         duration: 0,
         progress: 0,
     });
 
-    // 播放
+    const resetProgress = () => {
+        progressTime.value = {
+            currentTime: 0,
+            duration: 0,
+            progress: 0,
+        };
+    };
+
+    const syncCurrentSong = () => {
+        currentSong.value = audioList.value[currentSongIndex.value]?.url ?? '';
+        resetProgress();
+    };
+
     const play = async (audioElement: HTMLAudioElement | null) => {
-        if (audioElement) {
-            audioElement.play();
+        if (!audioElement || !currentSong.value) {
+            return;
+        }
+
+        try {
+            await audioElement.play();
             isPlay.value = true;
-            // console.log(currentSong.value);
-            
-            // if (progressTime.value.duration === 0) { 
-            //     const song = await fetchSong(sortType);
-            //     if (song) {
-            //         currentSong.value = song.url;
-            //         audioList.value = [song];
-            //         if (audioElement) {
-            //             stop(audioElement);
-            //             audioElement.src = song.url;
-            //             audioElement.load();
-            //             audioElement.addEventListener('canplaythrough', () => {
-            //                 play(audioElement);
-            //             }, { once: true });
-            //         }
-            //     }
-            // }
+        } catch (error) {
+            isPlay.value = false;
+            console.error('播放失败：', error);
         }
     };
 
-    // 暂停
     const stop = (audioElement: HTMLAudioElement | null) => {
         if (audioElement) {
             audioElement.pause();
-            isPlay.value = false;
         }
+        isPlay.value = false;
     };
 
-    // 切换播放状态
     const togglePlay = (audioElement: HTMLAudioElement | null) => {
         if (!isPlay.value) {
-            play(audioElement);
+            void play(audioElement);
         } else {
             stop(audioElement);
         }
     };
 
-    // 上一首
-    const prevSong = async (audioElement: HTMLAudioElement | null, sortType: string) => {
-        const song = await fetchSong(sortType);
-        if (song) {
-            currentSong.value = song.url;
-            audioList.value = [song];
-            if (audioElement) {
-                stop(audioElement);
-                audioElement.src = song.url;
-                audioElement.load();
-                audioElement.addEventListener('canplaythrough', () => {
-                    play(audioElement);
-                }, { once: true });
-            }
+    const setPlaylist = (songs: SongData[], startIndex = 0) => {
+        audioList.value = songs;
+        currentSongIndex.value = Math.min(Math.max(startIndex, 0), Math.max(songs.length - 1, 0));
+        syncCurrentSong();
+    };
+
+    const playSongAt = async (audioElement: HTMLAudioElement | null, index: number, shouldPlay = true) => {
+        if (!audioList.value.length) {
+            return;
+        }
+
+        currentSongIndex.value = (index + audioList.value.length) % audioList.value.length;
+        syncCurrentSong();
+
+        await nextTick();
+        audioElement?.load();
+
+        if (shouldPlay) {
+            await play(audioElement);
         }
     };
 
-    // 下一首
-    const nextSong = async (audioElement: HTMLAudioElement | null, sortType: string) => {
-        const song = await fetchSong(sortType);
-        // song && console.log(progressTime.value.duration);
-        if (song && progressTime.value.duration === 0) { 
-            console.log("当前歌曲不存在！");
-            
-        }
-        // if (progressTime.value.duration === 0) { 
-        //     console.log("当前歌曲不存在！");
-            
-        //     // nextSong(audioElement, sortType);    
-        // }
-        if (song) {
-            currentSong.value = song.url;
-            audioList.value = [song];
-            if (audioElement) {
-                stop(audioElement);
-                audioElement.src = song.url;
-                audioElement.load();
-                audioElement.addEventListener('canplaythrough', () => {
-                    play(audioElement);
-                }, { once: true });
-            }
-        }
+    const prevSong = (audioElement: HTMLAudioElement | null) => {
+        return playSongAt(audioElement, currentSongIndex.value - 1, true);
     };
 
-    // 更新进度
+    const nextSong = (audioElement: HTMLAudioElement | null) => {
+        return playSongAt(audioElement, currentSongIndex.value + 1, true);
+    };
+
     const updateProgress = (audioElement: HTMLAudioElement | null) => {
         if (audioElement) {
             progressTime.value.currentTime = audioElement.currentTime;
-            progressTime.value.duration = isNaN(audioElement.duration) ? 0 : audioElement.duration;
-            progressTime.value.progress = (audioElement.currentTime / progressTime.value.duration) * 100 || 0;
+            progressTime.value.duration = Number.isFinite(audioElement.duration) ? audioElement.duration : 0;
+            progressTime.value.progress = progressTime.value.duration
+                ? (audioElement.currentTime / progressTime.value.duration) * 100
+                : 0;
         }
     };
 
-    // 拖动进度条
     const seek = (audioElement: HTMLAudioElement | null, progress: number) => {
-        if (audioElement) {
+        if (audioElement && progressTime.value.duration) {
             audioElement.currentTime = (progress / 100) * progressTime.value.duration;
-            play(audioElement);
+            void play(audioElement);
         }
     };
 
@@ -130,6 +116,8 @@ export const usePlayer = () => {
         play,
         stop,
         togglePlay,
+        setPlaylist,
+        playSongAt,
         prevSong,
         nextSong,
         updateProgress,
