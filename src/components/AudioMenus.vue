@@ -1,6 +1,8 @@
 <script setup lang="ts">
 defineProps(["audioList", "loading", "currentSongIndex"]);
 const emit = defineEmits(["selectSong"]);
+
+const formatIndex = (i: number) => ++i;
 </script>
 
 <template>
@@ -17,7 +19,7 @@ const emit = defineEmits(["selectSong"]);
             @click="emit('selectSong', index)"
         >
             <n-image width="48" height="48" :src="item.picurl" preview-disabled object-fit="cover" />
-            <span class="song-index">{{ String(index + 1).padStart(2, '0') }}</span>
+            <span class="song-index">{{ formatIndex(Number(index)) }}</span>
             <span class="song-info">
                 <strong>{{ item.name }}</strong>
                 <small>{{ item.artistsname }}<template v-if="item.album"> · {{ item.album }}</template></small>
