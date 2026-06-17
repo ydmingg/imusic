@@ -1,93 +1,249 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import AudioMenus from '../AudioMenus.vue';
+import type { SongData } from '../../api/song';
 
-const nListItemIndex = ref(0)
-defineProps(["loading", "audioList", "currentSongIndex"])
+const playlists = ['热歌榜', '飙升榜', '新歌榜', '经典榜', '华语榜'];
 
+defineProps<{
+    loading: boolean;
+    audioList: SongData[];
+    currentSongIndex: number;
+    activePlaylist: string;
+    errorMessage: string;
+    currentSong?: SongData;
+}>();
 
-const dataNList = [
-    { title: '热歌榜', src: 'https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg', key: '1' },
-    { title: '飙升榜', src: 'https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg', key: '2' },
-]
-
-const handleNListItemSelect = (index: number) => nListItemIndex.value = index;
-
-
-const handleBeforeLeave = (tabName: string) => {
-    switch (tabName) {
-        case 'one':
-            console.log('热歌榜');
-            return true
-        case 'not-allowed':
-            // message.error('不许进来')
-            console.log('飙升榜');
-            
-            return true
-        case 'wait':
-            return new Promise<boolean>((resolve) => {
-                // const messageInstance = message.loading('Wait for 1s')
-
-                setTimeout(() => {
-                    // messageInstance.destroy()
-                    console.log('新哥榜1s后加载');
-                    
-                    resolve(true)
-                }, 1000)
-            })
-        default:
-            return true
-    }
-}
-
-const handleUpdateValue = (value: string) => {
-    // message.info(value)
-    console.log(value);
-    
-}
-
-
+const emit = defineEmits<{
+    changePlaylist: [value: string];
+    refreshPlaylist: [];
+    selectSong: [index: number];
+}>();
 </script>
 
 <template>
-    <n-layout position="absolute" style="top: 64px; bottom: 64px; max-width: 1200px; margin:auto;">
-        <n-flex size="large" justify="space-between" style="margin-top: 47px;">
-            <n-tabs
-                type="line"
-                placement="left" 
-                default-value="one"
-                :bar-width="210"
-                tab-class="tab-con"
-                @before-leave="handleBeforeLeave"
-                @update:value="handleUpdateValue"
-            >
-                <n-tab-pane name="one" tab="热歌榜">
-                    <AudioMenus :loading="loading" :audioList="audioList" :currentSongIndex="currentSongIndex" />
-                </n-tab-pane>
-                <n-tab-pane name="wait" tab="新哥榜">
-                    +1s
-                </n-tab-pane>
-                <n-tab-pane name="not-allowed" tab="飙升榜">
-                    ???
-                </n-tab-pane>
-                <n-tab-pane name="okay" tab="其他">
-                    555555555555可以
-                </n-tab-pane>
-            </n-tabs>
+    <section class="content-panel glass-card">
+        <div class="playlist-toolbar">
+            <div class="playlist-tabs" role="tablist" aria-label="榜单导航">
+                <button
+                    v-for="playlist in playlists"
+                    :key="playlist"
+                    class="playlist-tab"
+                    :class="{ active: playlist === activePlaylist }"
+                    type="button"
+                    @click="emit('changePlaylist', playlist)"
+                >
+                    {{ playlist }}
+                </button>
+            </div>
+            <n-button round secondary type="primary" :loading="loading" @click="emit('refreshPlaylist')">
+                刷新歌单
+            </n-button>
+        </div>
 
-        </n-flex>
-    </n-layout>
+        <n-alert v-if="errorMessage" type="warning" :show-icon="false" class="playlist-alert">
+            {{ errorMessage }}
+        </n-alert>
+
+        <div class="music-layout">
+            <AudioMenus
+                class="track-list"
+                :loading="loading"
+                :audioList="audioList"
+                :currentSongIndex="currentSongIndex"
+                @selectSong="emit('selectSong', $event)"
+            />
+
+            <aside class="now-playing glass-card inner-card">
+                <div class="cover-wrap">
+                    <img
+                        v-if="currentSong"
+                        :src="currentSong.picurl"
+                        :alt="currentSong.name"
+                        class="cover-image"
+                    />
+                    <div v-else class="cover-placeholder">IMusic</div>
+                </div>
+                <div class="song-meta">
+                    <p class="eyebrow">Now Playing</p>
+                    <h2>{{ currentSong?.name ?? '等待播放' }}</h2>
+                    <p>{{ currentSong?.artistsname ?? '选择一首歌开始' }}</p>
+                    <small v-if="currentSong?.album">{{ currentSong.album }}</small>
+                </div>
+                <div class="lyrics-card">
+                    <p class="eyebrow">歌词</p>
+                    <div class="lyrics-lines">
+                        <p>{{ currentSong?.name ?? 'IMusic' }}</p>
+                        <p>让旋律落在深色玻璃的光影里</p>
+                        <p>跟随节拍，切换你喜欢的榜单</p>
+                        <p>当前公共 API 暂不提供完整歌词</p>
+                        <p>这里会随歌曲展示播放氛围文案</p>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </section>
 </template>
 
 <style scoped>
-.n-list-aside {
-    min-width: 210px;
-    box-shadow: 0 0 20px 0 rgba(65, 67, 70, .05);
-
-    .n-list-aside-item.active {
-        background: #efefef;
-    }
+.content-panel {
+    position: relative;
+    z-index: 1;
+    width: min(1180px, calc(100vw - 32px));
+    margin: 22px auto 110px;
+    padding: 20px;
 }
-.tab-con{
-    gap: 80px;
+
+.playlist-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.playlist-tabs {
+    display: flex;
+    flex: 1;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.playlist-tab {
+    min-width: 88px;
+    padding: 10px 18px;
+    color: rgba(255, 255, 255, .76);
+    cursor: pointer;
+    background: rgba(255, 255, 255, .08);
+    border: 1px solid rgba(255, 255, 255, .14);
+    border-radius: 999px;
+    transition: all .2s ease;
+}
+
+.playlist-tab:hover,
+.playlist-tab.active {
+    color: #fff;
+    background: linear-gradient(135deg, rgba(124, 58, 237, .95), rgba(14, 165, 233, .82));
+    box-shadow: 0 14px 36px rgba(124, 58, 237, .28);
+    transform: translateY(-1px);
+}
+
+.playlist-alert {
+    margin-bottom: 16px;
+}
+
+.music-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr);
+    gap: 20px;
+}
+
+.track-list {
+    min-height: 520px;
+}
+
+.now-playing {
+    position: sticky;
+    top: 88px;
+    align-self: start;
+    padding: 20px;
+}
+
+.inner-card {
+    background: rgba(255, 255, 255, .08);
+}
+
+.cover-wrap {
+    overflow: hidden;
+    aspect-ratio: 1;
+    border: 1px solid rgba(255, 255, 255, .14);
+    border-radius: 28px;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, .34);
+}
+
+.cover-image,
+.cover-placeholder {
+    width: 100%;
+    height: 100%;
+}
+
+.cover-image {
+    display: block;
+    object-fit: cover;
+}
+
+.cover-placeholder {
+    display: grid;
+    place-items: center;
+    color: rgba(255, 255, 255, .72);
+    font-size: 32px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #312e81, #0f172a);
+}
+
+.song-meta {
+    margin: 18px 0;
+    color: #fff;
+}
+
+.song-meta h2 {
+    margin: 4px 0;
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.song-meta p,
+.song-meta small,
+.lyrics-lines {
+    color: rgba(255, 255, 255, .68);
+}
+
+.eyebrow {
+    color: #a78bfa !important;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+}
+
+.lyrics-card {
+    padding: 18px;
+    background: rgba(15, 23, 42, .42);
+    border: 1px solid rgba(255, 255, 255, .12);
+    border-radius: 22px;
+}
+
+.lyrics-lines {
+    max-height: 210px;
+    overflow-y: auto;
+    margin-top: 10px;
+    line-height: 2;
+}
+
+@media (max-width: 860px) {
+    .content-panel {
+        margin-top: 14px;
+        padding: 14px;
+    }
+
+    .playlist-toolbar,
+    .music-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .playlist-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .music-layout {
+        display: flex;
+        flex-direction: column-reverse;
+    }
+
+    .now-playing {
+        position: static;
+    }
 }
 </style>
