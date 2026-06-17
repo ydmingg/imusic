@@ -31,7 +31,7 @@ body::before {
 
 .app-shell {
   min-height: 100vh;
-  padding-bottom: 1px;
+  padding: 16px;
 }
 
 .glass-card {

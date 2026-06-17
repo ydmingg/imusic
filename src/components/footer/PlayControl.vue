@@ -93,16 +93,19 @@ const handleNextSong = () => emit("handleNextSong")
 <style scoped>
 .play-footer {
     position: fixed;
-    right: 24px;
+    /* right: 24px; */
     bottom: 18px;
-    left: 24px;
+    /* left: 24px; */
     z-index: 5;
     display: grid;
-    grid-template-columns: minmax(220px, 1fr) minmax(280px, 1.2fr) minmax(180px, 1fr);
+    width:calc(100% - 32px);
+    /* grid-template-columns: minmax(220px, 1fr) minmax(280px, 1.2fr) minmax(180px, 1fr); */
+    grid-template-columns: repeat(3, minmax(220px, 1fr));
     gap: 18px;
     align-items: center;
-    min-height: 88px;
+    height: 108px;
     padding: 14px 18px;
+    margin: 0 auto;
 }
 
 .track-mini,

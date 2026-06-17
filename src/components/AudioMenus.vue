@@ -43,7 +43,7 @@ const emit = defineEmits<{ selectSong: [index: number] }>();
     max-height: calc(100vh - 260px);
     min-height: 520px;
     overflow-y: auto;
-    padding-right: 8px;
+    padding:1px 8px 1px 0;
 }
 
 .audio-box-list::-webkit-scrollbar,

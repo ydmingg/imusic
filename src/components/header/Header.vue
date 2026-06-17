@@ -67,7 +67,7 @@ const handleGithub = () => {
             <n-flex justify="end" style="flex:1">
                 <!-- <n-button size="small" quaternary>English</n-button>
                 <n-button size="small" quaternary>浅色</n-button> -->
-                <n-button size="small" round secondary @click="handleGithub">Github</n-button>
+                <n-button size="small" round quaternary @click="handleGithub" color="white">Github</n-button>
                 <!-- <n-text size="small" cursor="pointer">登录&注册</n-text> -->
             </n-flex>
         </n-flex>
@@ -84,7 +84,7 @@ const handleGithub = () => {
     z-index: 10;
     width: min(1180px, calc(100vw - 32px));
     height: 64px;
-    margin: 16px auto 0;
+    margin: 0 auto 0;
     padding: 0 22px;
 }
 

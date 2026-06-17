@@ -35,7 +35,7 @@ const emit = defineEmits<{
                     {{ playlist }}
                 </button>
             </div>
-            <n-button round secondary type="primary" :loading="loading" @click="emit('refreshPlaylist')">
+            <n-button round text type="info" :loading="loading" @click="emit('refreshPlaylist')">
                 刷新歌单
             </n-button>
         </div>
@@ -89,7 +89,7 @@ const emit = defineEmits<{
     position: relative;
     z-index: 1;
     width: min(1180px, calc(100vw - 32px));
-    margin: 22px auto 110px;
+    margin: 22px auto 132px;
     padding: 20px;
 }
 
