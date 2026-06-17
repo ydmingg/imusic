@@ -1,7 +1,7 @@
 {
   "name": "IMusic",
   "short_name": "IMusic",
-  "description": "A glassmorphism music player with playlist charts.",
+  "description": "感谢使用！",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -10,9 +10,10 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/appstore-images/windows/SmallTile.scale-400.png",
+      "src": "https://pub.mini-tools.uk/30-day/29fb8a35-e9c9-4f26-a14d-c943128cab83.png",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
     }
-  ]
+  ],
+  "id": "pwa-id-ydming"
 }

@@ -1,5 +1,5 @@
 const CACHE_NAME = 'imusic-shell-v1';
-const APP_SHELL = ['/', '/manifest.webmanifest', '/favicon.ico'];
+const APP_SHELL = ['/', '/manifest.webmanifest', '/appstore-images/windows/SmallTile.scale-400.png'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));
