@@ -48,11 +48,11 @@ const handleGithub = () => {
 </script>
 
 <template>
-    <n-layout-header bordered>
+    <header class="app-header glass-card">
         <n-flex style="height: 100%;" align="center">
             <n-flex style="flex:1">
                 <n-image width="32" height="32" :src="getImageUrl('naivelogo-BdDVTUmz.svg')" preview-disabled/>
-                <span class="font-16">IMusic</span>
+                <span class="brand-name">IMusic</span>
             </n-flex>
             <n-flex justify="center"></n-flex>
             <!-- <n-grid-item span="0 400:1 600:2 800:3">
@@ -67,29 +67,31 @@ const handleGithub = () => {
             <n-flex justify="end" style="flex:1">
                 <!-- <n-button size="small" quaternary>English</n-button>
                 <n-button size="small" quaternary>浅色</n-button> -->
-                <n-button size="small" quaternary @click="handleGithub">Github</n-button>
+                <n-button size="small" round secondary @click="handleGithub">Github</n-button>
                 <!-- <n-text size="small" cursor="pointer">登录&注册</n-text> -->
             </n-flex>
         </n-flex>
         
             
             
-    </n-layout-header>
+    </header>
 </template>
 
 <style scoped>
-.n-layout-header {
-    /* background: rgba(128, 128, 128, 0.2); */
+.app-header {
+    position: sticky;
+    top: 16px;
+    z-index: 10;
+    width: min(1180px, calc(100vw - 32px));
     height: 64px;
-    padding: 0 24px;
+    margin: 16px auto 0;
+    padding: 0 22px;
+}
 
-    /* .ui-logo img {
-        height: 32px;
-        margin-right: 12px;
-        width: 32px;
-    } */
-    .font-16 {
-        font-size: 16px;
-    }
+.brand-name {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: .04em;
 }
 </style>

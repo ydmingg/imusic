@@ -14,13 +14,21 @@ interface ITunesTrack {
     collectionName?: string;
     artworkUrl100?: string;
     previewUrl?: string;
+    primaryGenreName?: string;
 }
 
-const SORT_KEYWORDS: Record<string, string> = {
-    热歌榜: 'top hits',
-    飙升榜: 'new pop',
-    新歌榜: 'new music',
-    经典榜: 'classic hits',
+interface PlaylistConfig {
+    term: string;
+    country: string;
+    lang?: string;
+}
+
+const PLAYLIST_CONFIG: Record<string, PlaylistConfig> = {
+    热歌榜: { term: 'top hits', country: 'US' },
+    飙升榜: { term: 'new pop', country: 'US' },
+    新歌榜: { term: 'new music', country: 'US' },
+    经典榜: { term: 'classic hits', country: 'US' },
+    华语榜: { term: '华语 流行 国语', country: 'CN', lang: 'zh_cn' },
 };
 
 const FALLBACK_SONGS: SongData[] = [
@@ -50,6 +58,8 @@ const FALLBACK_SONGS: SongData[] = [
     },
 ];
 
+const containsChinese = (value = '') => /[\u4e00-\u9fa5]/.test(value);
+
 const normalizeTrack = (track: ITunesTrack, index: number): SongData | null => {
     if (!track.previewUrl || !track.trackName || !track.artistName) {
         return null;
@@ -58,22 +68,26 @@ const normalizeTrack = (track: ITunesTrack, index: number): SongData | null => {
     return {
         id: track.trackId ?? Date.now() + index,
         artistsname: track.artistName,
-        picurl: (track.artworkUrl100 ?? '').replace('100x100bb', '300x300bb'),
+        picurl: (track.artworkUrl100 ?? '').replace('100x100bb', '600x600bb'),
         name: track.trackName,
         url: track.previewUrl,
         album: track.collectionName,
     };
 };
 
-export const fetchSongs = async (sortType: string, limit = 20): Promise<SongData[]> => {
-    const term = SORT_KEYWORDS[sortType] ?? sortType;
+export const fetchSongs = async (sortType: string, limit = 100): Promise<SongData[]> => {
+    const config = PLAYLIST_CONFIG[sortType] ?? { term: sortType, country: 'US' };
     const params = new URLSearchParams({
-        term,
+        term: config.term,
         media: 'music',
         entity: 'song',
         limit: String(limit),
-        country: 'US',
+        country: config.country,
     });
+
+    if (config.lang) {
+        params.set('lang', config.lang);
+    }
 
     try {
         const response = await fetch(`https://itunes.apple.com/search?${params.toString()}`);
@@ -82,12 +96,12 @@ export const fetchSongs = async (sortType: string, limit = 20): Promise<SongData
         }
 
         const result = await response.json() as { results?: ITunesTrack[] };
-        const songs = (result.results ?? [])
+        const normalizedSongs = (result.results ?? [])
+            .filter((track) => sortType !== '华语榜' || containsChinese(`${track.trackName}${track.artistName}${track.collectionName}`))
             .map(normalizeTrack)
             .filter((song): song is SongData => Boolean(song));
-        // console.log(songs);
-        
-        return songs.length > 0 ? songs : FALLBACK_SONGS;
+
+        return normalizedSongs.length > 0 ? normalizedSongs : FALLBACK_SONGS;
     } catch (error) {
         console.error('获取歌曲清单失败，使用备用歌曲：', error);
         return FALLBACK_SONGS;
